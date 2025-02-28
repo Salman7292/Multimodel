@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Model Hub</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+<link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <div class="container">
+        <button class="toggle-btn" id="sidebarToggle">
+            <i class="fas fa-bars"></i>
+        </button>
+
+        <!-- Model Selection Sidebar -->
+        <div class="sidebar" id="sidebar">
+            <h2>Select Model</h2>
+            <div class="model-list">
+                <div class="model-card active" data-model="GPT-4" data-icon="/static/images/gpt-icon.png">
+                    <div class="model-icon-wrapper">
+                        <img src="/static/images/2 (2).png" alt="GPT-4" class="model-icon">
+                    </div>
+                    <span class="model-name"><a href="{{ url_for('gpt') }}">GPT-4</a></span>
+                </div>
+                <div class="model-card" data-model="Gemini" data-icon="/static/images/gpt-icon.png">
+                    <div class="model-icon-wrapper">
+                        <img src="/static/images/1.png" alt="Gemini" class="model-icon">
+                    </div>
+                    <span class="model-name"><a href="{{ url_for('home') }}">Gemini</a></span>
+                </div>
+
+                <div class="model-card" data-model="Gemini" data-icon="/static/images/gpt-icon.png">
+                    <div class="model-icon-wrapper">
+                        <img src="/static/images/3 (2).png" alt="DeepSeek" class="model-icon">
+                    </div>
+                    <span class="model-name"><a href="{{ url_for('deepseek') }}">DeepSeek</a></span>
+                </div>
+
+
+
+
+            </div>
+
+            <!-- History Section -->
+            <div class="history-section">
+                <h3>History</h3>
+                <div class="history-list">
+                    {% for message in chat_history %}
+                    <div class="history-item">
+                        {{ message.content[:50] }}{% if message.content|length > 50 %}...{% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Chat Area -->
+        <div class="main-content">
+            <div class="model-header">
+                <img src="/static/images/2 (2).png" alt="Gemini" class="model-icon">
+                <h2>GPT-4</h2>
+                <h1 class="welcome-message gradient-text" style="text-align: center; padding-left: 10px;">Hello! I'm Your All-in-One
+                    LLM Hub!</h1>
+            </div>
+
+            <div class="chat-container">
+                {% if not chat_history %}
+                
+                {% endif %}
+                {% for message in chat_history %}
+                <div class="message {% if message.type == 'human' %}user-message{% endif %}">
+                    <strong>{% if message.type == 'human' %}You{% else %}AI{% endif %}:</strong>
+                    {{ message.content }}
+                </div>
+                {% endfor %}
+            </div>
+
+            <div class="loading">
+                <i class="fas fa-spinner fa-spin"></i> Generating response...
+            </div>
+
+            <DIV style="width: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center;">
+
+         
+                <DIV style="background-color: #3a363773; width: 82%;border-radius: 12px;padding: 10px;border: 1px solid;">
+                    <form method="POST" class="input-area" style="background: #3d3d3d; border-radius: 20px;" >
+                        <input type="hidden" id="selected_model" name="selected_model" value="Gemini">
+                        <input type="text" name="user_input" placeholder="Enter your prompt here..." id="user-input" required>
+                        <button type="submit" class="button1">
+                            <i class="fas fa-paper-plane"></i>
+                        </button>
+                    </form>
+                    <form method="POST" action="/reset">
+                        <button type="submit" style="background: #dc3545; margin-top: 10px;" >
+                            <i class="fas fa-trash"></i> Reset Chat
+                        </button>
+                    </form>
+                </DIV>
+
+            </DIV>
+
+
+
+
+
+
+
+
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const sidebar = document.getElementById('sidebar');
+            const sidebarToggle = document.getElementById('sidebarToggle');
+            const container = document.querySelector('.container');
+
+            // Animate welcome message on first load
+            const welcomeMessage = document.querySelector('.welcome-message');
+            if (welcomeMessage) {
+                const text = welcomeMessage.textContent;
+                welcomeMessage.textContent = '';
+                createTypingEffect(welcomeMessage, text);
+            }
+
+            // Modified createTypingEffect function
+            async function createTypingEffect(element, text) {
+                let index = 0;
+                const chatContainer = document.querySelector('.chat-container');
+
+                return new Promise((resolve) => {
+                    const interval = setInterval(() => {
+                        if (index < text.length) {
+                            element.innerHTML = text.slice(0, index + 1) + '<span class="typing-animation"></span>';
+                            index++;
+                            if (chatContainer) {
+                                chatContainer.scrollTop = chatContainer.scrollHeight;
+                            }
+                        } else {
+                            element.innerHTML = text; // Remove typing cursor
+                            clearInterval(interval);
+                            resolve();
+                        }
+                    }, 20);
+                });
+            }
+
+
+
+            function toggleSidebar() {
+                container.classList.toggle('collapsed');
+                sidebar.classList.toggle('collapsed');
+                sidebarToggle.classList.toggle('collapsed');
+
+                if (window.innerWidth <= 768) {
+                    sidebar.classList.toggle('active');
+                }
+            }
+
+            function updateToggleIcon() {
+                const isCollapsed = container.classList.contains('collapsed');
+                const icon = isCollapsed ? 'fa-chevron-right' : 'fa-chevron-left';
+                sidebarToggle.innerHTML = `<i class="fas ${icon}"></i>`;
+            }
+
+            sidebarToggle.addEventListener('click', toggleSidebar);
+            window.addEventListener('resize', () => {
+                if (window.innerWidth > 768) {
+                    container.classList.remove('collapsed');
+                    sidebar.classList.remove('collapsed', 'active');
+                    sidebarToggle.classList.remove('collapsed');
+                }
+                updateToggleIcon();
+            });
+
+            // Chat functionality
+            async function generateResponse() {
+                const input = document.getElementById('user-input');
+                const chatContainer = document.querySelector('.chat-container');
+                const loading = document.querySelector('.loading');
+                const userMessage = input.value.trim();
+                const selectedModel = document.getElementById('selected_model').value;
+
+                if (!userMessage) return;
+
+                // Add user message
+                chatContainer.innerHTML += `
+                    <div class="message user-message">
+                        <strong>You:</strong> ${userMessage}
+                    </div>
+                `;
+
+                // Create AI message container
+                const aiMessageDiv = document.createElement('div');
+                aiMessageDiv.className = 'message';
+                aiMessageDiv.innerHTML = '<img src="/static/images/2 (2).png" alt="Gemini" class="model-icon" width="10px"><div><span class="message-content"></span>';
+                chatContainer.appendChild(aiMessageDiv);
+
+                // Show loading
+                loading.style.display = 'block';
+
+                try {
+                    const response = await fetch('/gpt', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                        body: new URLSearchParams({
+                            'user_input': userMessage,
+                            'selected_model': selectedModel
+                        })
+                    });
+
+                    const data = await response.text();
+                    const parser = new DOMParser();
+                    const doc = parser.parseFromString(data, 'text/html');
+                    const newMessages = doc.querySelectorAll('.message');
+                    const latestResponse = newMessages[newMessages.length - 1].textContent.replace('AI:', '').trim();
+
+                    loading.style.display = 'none';
+                    const contentSpan = aiMessageDiv.querySelector('.message-content');
+                    await createTypingEffect(contentSpan, latestResponse);
+
+                } catch (error) {
+                    loading.style.display = 'none';
+                    aiMessageDiv.innerHTML = `<strong>AI:</strong> Error: ${error.message}`;
+                }
+
+                chatContainer.scrollTop = chatContainer.scrollHeight;
+                input.value = '';
+            }
+
+            async function createTypingEffect(element, text) {
+                let index = 0;
+                element.innerHTML = '<span class="typing-animation"></span>';
+                const typingSpan = element.querySelector('.typing-animation');
+
+                return new Promise((resolve) => {
+                    const interval = setInterval(() => {
+                        if (index < text.length) {
+                            typingSpan.innerHTML = text.slice(0, index + 1) + '<span class="typing-animation"></span>';
+                            index++;
+                            chatContainer.scrollTop = chatContainer.scrollHeight;
+                        } else {
+                            clearInterval(interval);
+                            typingSpan.classList.remove('typing-animation');
+                            resolve();
+                        }
+                    }, 20);
+                });
+            }
+
+            document.querySelector('form').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                await generateResponse();
+            });
+
+            // Initial icon setup
+            updateToggleIcon();
+        });
+    </script>
+</body>
+</html>

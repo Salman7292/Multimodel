@@ -1,0 +1,438 @@
+
+
+@import url('https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,100;0,300;0,400;0,700;0,900;1,100;1,300;1,400;1,700;1,900&family=Roboto+Condensed:ital,wght@0,100..900;1,100..900&display=swap');
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+ 
+    font-family: "Roboto Condensed", serif;
+}
+
+body {
+    background: #1a1a1a;
+    color: #ffffff;
+    min-height: 100vh;
+}
+
+.container {
+    display: grid;
+    grid-template-columns: 250px 1fr;
+    gap: 20px;
+    padding: 20px;
+    max-width: 1400px;
+    margin: 0 auto;
+    transition: grid-template-columns 0.3s ease;
+}
+
+/* Collapsed state */
+.container.collapsed {
+    grid-template-columns: 0 1fr;
+}
+
+/* Model Selection Sidebar */
+.sidebar {
+    background: #2d2d2d;
+    border-radius: 15px;
+    padding: 20px;
+    height: calc(100vh - 40px);
+    position: sticky;
+    top: 20px;
+    transition: all 0.3s ease;
+    overflow: hidden;
+}
+
+.sidebar.collapsed {
+    opacity: 0;
+    visibility: hidden;
+    margin-left: -20px;
+}
+
+.model-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.model-card {
+    background: #3d3d3d;
+    padding: 6px;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: 0.3s;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: bold;
+}
+.model-card a{
+text-decoration: none;
+color: white;
+font-weight: bold;
+}
+.model-card:hover {
+    background: #4d4d4d;
+}
+
+.model-card.active {
+    background: #007bff;
+}
+
+/* Main Chat Area */
+.main-content {
+   
+    border-radius: 15px;
+    padding: 8px;
+    display: flex;
+    flex-direction: column;
+    height: calc(100vh - 40px);
+    transition: margin-left 0.3s ease;
+}
+.chat-container {
+    flex-grow: 1;
+    overflow-y: auto;
+    padding: 0px 14px;
+    background: #1a1a1a;
+    border-radius: 10px;
+    /* margin-bottom: -9px; */
+    /* box-shadow: 0px 1px 7px rgb(242 239 239 / 58%); */
+
+
+}
+
+.message {
+    margin-bottom: 10px;
+    padding: 31px !important;
+    border-radius: 8px;
+    background: #3d3d3d;
+    font-size: 13px;
+}
+
+.user-message {
+    background: #007bff;
+    margin-left: 58%;
+    padding: 12px !important;
+}
+
+.input-area {
+    display: flex;
+    gap: 10px;
+}
+
+input[type="text"] {
+    flex-grow: 1;
+    padding: 15px;
+    border: none;
+    background: #3d3d3d;
+    color: white;
+    border-bottom-left-radius: 20px;
+    border-top-left-radius: 20px;
+}
+
+input[type="text"]:focus-visible {
+    border: none;
+  
+    color: white;
+    outline: none; /* Optional: removes browser's default focus outline */
+}
+
+
+.button1 {
+    padding: 15px 30px;
+    border: none;
+
+    background: #3d3d3d;
+    color: #fafcfd;
+    cursor: pointer;
+    transition: 0.3s;
+    border-bottom-right-radius: 20px;
+    border-top-right-radius: 20px;
+}
+
+button{
+    padding: 15px 30px;
+    border: none;
+
+    background: #3d3d3d;
+    color: #fafcfd;
+    cursor: pointer;
+    transition: 0.3s;
+    border-radius: 20px;
+
+}
+
+
+
+.model-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.model-icon {
+    width: 30px;
+    
+    border-radius: 50%;
+}
+
+.loading {
+    display: none;
+    text-align: center;
+    padding: 20px;
+}
+
+.history-section {
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px solid #4d4d4d;
+}
+
+.history-item {
+    font-size: 0.9em;
+    padding: 10px;
+    margin: 5px 0;
+    background: #3d3d3d;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.typing-animation {
+    display: inline-block;
+}
+
+.typing-animation::after {
+    content: "|";
+    animation: cursor 1.1s infinite step-start;
+    color: #ffffff;
+}
+
+@keyframes cursor {
+    50% { opacity: 0; }
+}
+
+.message-content {
+    display: inline;
+
+}
+
+.toggle-btn {
+    position: fixed;
+    left: 222px;
+    top: 37px;
+    background: #2d2d2d;
+    border: none;
+    color: white;
+    padding: 10px 15px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    z-index: 100;
+}
+
+.toggle-btn:hover {
+    background: #007bff;
+}
+
+.toggle-btn.collapsed {
+    left: 5px;
+}
+
+@media (max-width: 768px) {
+    .container {
+        grid-template-columns: 1fr;
+        padding: 10px;
+    }
+
+    .sidebar {
+        position: fixed;
+        left: -300px;
+        width: 250px;
+        height: calc(100vh - 20px);
+        z-index: 99;
+        transition: left 0.3s ease;
+    }
+
+    .sidebar.active {
+        left: 10px;
+    }
+
+    .toggle-btn {
+        left: 20px;
+        top: 20px;
+    }
+
+    .container.collapsed {
+        grid-template-columns: 1fr;
+    }
+
+    .gradient-text {
+        font-size: 1em;
+
+    }
+
+
+}
+
+
+
+.typing-animation::after {
+    content: "|";
+    animation: blink 1s infinite;
+    opacity: 1;
+    margin-left: 2px;
+}
+
+@keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0; }
+}
+
+
+.gradient-text {
+    margin-left: 50px;
+    font-size: 2em; /* Adjust font size as needed */
+    font-weight: bold; /* Make the text bold for better gradient effect */
+    background: linear-gradient(to right, #667eea, #764ba2, #6f1a07); /* Define the gradient */
+    -webkit-background-clip: text; /* Clip the background to the text shape */
+    -webkit-text-fill-color: transparent; /* Make the text fill transparent, showing the background */
+    display: inline-block; /* Ensures the background covers only the text area */
+  }
+
+
+
+    /* Add to your existing CSS */
+    .sidebar {
+        display: flex;
+        flex-direction: column;
+        height: 92vh;
+    }
+
+    .history-section {
+        flex: 1;
+        overflow: hidden;
+    }
+
+    .history-list {
+        max-height: 100%;
+        overflow-y: auto;
+        padding-right: 8px; /* Prevent content from being hidden under scrollbar */
+    }
+
+    /* Optional scrollbar styling */
+    .history-list::-webkit-scrollbar {
+        width: 8px;
+    }
+
+    .history-list::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 4px;
+    }
+
+    .history-list::-webkit-scrollbar-thumb {
+        background: #888;
+        border-radius: 4px;
+    }
+
+    .history-list::-webkit-scrollbar-thumb:hover {
+        background: #555;
+    }
+
+
+    
+   
+    
+    .input_section {
+        background-color: #3a363773;
+        width: 82%;
+        border-radius: 12px;
+        padding: 10px;
+        border: 1px solid;
+        box-shadow: 0px 1px 7px rgb(242 239 239 / 58%);
+        
+    }
+
+    .input_section2{
+        position: fixed;
+        bottom: 20px;
+        left: 20px;
+    }
+
+    @media (max-width: 768px) {
+        .sidebar {
+            position: fixed;
+            left: 0%;
+            top: 0px;
+            width: 250px;
+            height: 100vh;
+            transition: left 0.3s ease-in-out;
+            overflow-y: auto;
+            background: #2d2d2d;
+            z-index: 1000;
+        }
+        .input_section{
+            width: 100% !important;
+        }
+    
+        .sidebar.active {
+            left: 0;
+        }
+    
+        .toggle-btn {
+            left: 206px;
+            top: 5px;
+            z-index: 1001;
+        }
+    }
+
+    
+    @media (max-width: 600px) {
+        .input-area {
+            flex-direction: row;
+            gap: 5px;
+        }
+    
+        input[type="text"] {
+            width: 100%;
+            border-radius: 10px;
+        }
+    
+        .button1 {
+            width: 21%;
+            border-radius: 10px;
+        }
+        .input_section{
+            width: 100%;
+        }
+        .gradient-text {
+            font-size: .8em;
+    
+        }
+    }
+    
+    @media (max-width: 600px) {
+        .model-list {
+            flex-direction: column;
+        }
+    
+        .model-card {
+            flex-direction: row;
+            justify-content: center;
+            align-items: center;
+            padding: 10px;
+        }
+
+        .input_section{
+            width: 100%;
+        }
+
+        .gradient-text {
+            font-size: .8em;
+    
+        }
+    }
+
+
+
+

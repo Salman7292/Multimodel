@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Model Hub</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/github.min.css">
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<style>
+    /* Improved loading spinner positioning */
+    .loading {
+        display: none;
+        position: fixed;
+        bottom: 100px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: rgba(0, 0, 0, 0.8);
+        color: white;
+        padding: 10px 20px;
+        border-radius: 20px;
+        z-index: 1000;
+    }
+
+    /* Improved message formatting */
+    .message-content {
+    white-space: inherit;
+    line-height: 1.8;
+    padding: 15px;
+    margin: 10px 0;
+    /* border-radius: 10px; */
+    /* background: rgba(255, 255, 255, 0.1); */
+}
+
+.hljs {
+    color: #fcfeff !important;
+    background: #0f0f0fcf !important;
+    border-radius: 10px !important;
+    margin: 13px !important;
+}
+
+.rest_button{
+    position: fixed;
+    top: 10px;
+    right: 20px;
+}
+
+
+</style>
+
+<body>
+    <div class="container">
+        <button class="toggle-btn" id="sidebarToggle">
+            <i class="fas fa-bars"></i>
+        </button>
+
+        <!-- Model Selection Sidebar -->
+        <div class="sidebar" id="sidebar">
+            <h2>Select Model</h2>
+            <div class="model-list">
+                <div class="model-card active" data-model="GPT-4" data-icon="/static/images/gpt-icon.png">
+                    <div class="model-icon-wrapper">
+                        <img src="/static/images/2 (2).png" alt="GPT-4" class="model-icon">
+                    </div>
+                    <span class="model-name"><a href="{{ url_for('gpt') }}">GPT-4</a></span>
+                </div>
+                <div class="model-card" data-model="Gemini" data-icon="/static/images/gpt-icon.png">
+                    <div class="model-icon-wrapper">
+                        <img src="/static/images/1.png" alt="Gemini" class="model-icon">
+                    </div>
+                    <span class="model-name"><a href="{{ url_for('home') }}">Gemini</a></span>
+                </div>
+
+                <div class="model-card" data-model="Gemini" data-icon="/static/images/gpt-icon.png">
+                    <div class="model-icon-wrapper">
+                        <img src="/static/images/3 (2).png" alt="DeepSeek" class="model-icon">
+                    </div>
+                    <span class="model-name"><a href="{{ url_for('deepseek') }}">DeepSeek</a></span>
+                </div>
+            </div>
+
+            <!-- History Section -->
+            <div class="history-section">
+                <h3>History</h3>
+                <div class="history-list">
+                    {% for message in chat_history %}
+
+                        {% if message.type == 'human' %}
+                        <div class="history-item">
+                            {{ message.content[:50] }}{% if message.content|length > 50 %}...{% endif %}
+                        </div>
+
+                        {% endif %}
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Chat Area -->
+        <div class="main-content">
+            <div class="model-header">
+                <img src="/static/images/2 (2).png" alt="GPT-4" class="model-icon">
+                <h2>GPT-4</h2>
+                <h1 class="welcome-message gradient-text" style="text-align: center; padding-left: 10px;">Hello! I'm Your All-in-One LLM Hub!</h1>
+            
+                <form method="POST" action="/reset" class="rest_button">
+                    <button type="submit" style="background: #dc3545; margin-top: 10px;">
+                        <i class="fas fa-trash"></i> Reset Chat
+                    </button>
+                </form>
+            
+            </div>
+
+            <div class="chat-container">
+                {% for message in chat_history %}
+                <div class="message {% if message.type == 'human' %}user-message{% endif %}">
+                    <strong>{% if message.type == 'human' %}<img src="/static/images/user.png" alt="user" class="model-icon" width="10px">{% else %}<img src="/static/images/2 (2).png" alt="GPT-4" class="model-icon" width="10px">{% endif %}</strong>
+                    <div class="message-content">
+                        {{ message.content|safe }}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+
+            <div class="loading">
+                <i class="fas fa-spinner fa-spin"></i> Generating response...
+            </div>
+
+            <div style="width: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center;">
+                <div class="input_section">
+                    <form method="POST" class="input-area" style="background: #3d3d3d; border-radius: 20px;">
+                        <input type="hidden" id="selected_model" name="selected_model" value="Gemini">
+                        <input type="text" name="user_input" placeholder="Enter your prompt here..." id="user-input" required>
+                        <button type="submit" class="button1">
+                            <i class="fas fa-paper-plane"></i>
+                        </button>
+                    </form>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+
+
+    
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        // ... [keep existing JavaScript code until generateResponse function]
+                    // ... [keep all existing JavaScript code unchanged] .
+                    const sidebar = document.getElementById('sidebar');
+            const sidebarToggle = document.getElementById('sidebarToggle');
+            const container = document.querySelector('.container');
+
+            // Animate welcome message on first load
+            const welcomeMessage = document.querySelector('.welcome-message');
+            if (welcomeMessage) {
+                const text = welcomeMessage.textContent;
+                welcomeMessage.textContent = '';
+                createTypingEffect(welcomeMessage, text);
+            }
+
+            // Modified createTypingEffect function
+            async function createTypingEffect(element, text) {
+                let index = 0;
+                const chatContainer = document.querySelector('.chat-container');
+
+                return new Promise((resolve) => {
+                    const interval = setInterval(() => {
+                        if (index < text.length) {
+                            element.innerHTML = text.slice(0, index + 1) + '<span class="typing-animation"></span>';
+                            index++;
+                            if (chatContainer) {
+                                chatContainer.scrollTop = chatContainer.scrollHeight;
+                            }
+                        } else {
+                            element.innerHTML = text; // Remove typing cursor
+                            clearInterval(interval);
+                            resolve();
+                        }
+                    }, 20);
+                });
+            }
+
+
+
+            function toggleSidebar() {
+                container.classList.toggle('collapsed');
+                sidebar.classList.toggle('collapsed');
+                sidebarToggle.classList.toggle('collapsed');
+
+                if (window.innerWidth <= 768) {
+                    sidebar.classList.toggle('active');
+                }
+            }
+
+            function updateToggleIcon() {
+                const isCollapsed = container.classList.contains('collapsed');
+                const icon = isCollapsed ? 'fa-chevron-right' : 'fa-chevron-left';
+                sidebarToggle.innerHTML = `<i class="fas ${icon}"></i>`;
+            }
+
+            sidebarToggle.addEventListener('click', toggleSidebar);
+            window.addEventListener('resize', () => {
+                if (window.innerWidth > 768) {
+                    container.classList.remove('collapsed');
+                    sidebar.classList.remove('collapsed', 'active');
+                    sidebarToggle.classList.remove('collapsed');
+                }
+                updateToggleIcon();
+            });
+
+        async function generateResponse() {
+            const input = document.getElementById('user-input');
+            const chatContainer = document.querySelector('.chat-container');
+            const loading = document.querySelector('.loading');
+            const userMessage = input.value.trim();
+            const selectedModel = document.getElementById('selected_model').value;
+
+            if (!userMessage) return;
+
+            // Add user message
+            chatContainer.innerHTML += `
+                <div class="message user-message">
+                    <strong>You:</strong>
+                    <div class="message-content">${userMessage}</div>
+                </div>
+            `;
+
+            // Create AI message container
+            const aiMessageDiv = document.createElement('div');
+            aiMessageDiv.className = 'message';
+            aiMessageDiv.innerHTML = `
+                <img src="/static/images/1.png" alt="Gemini" class="model-icon" width="30px">
+                <div class="message-content"></div>
+            `;
+
+            chatContainer.appendChild(aiMessageDiv);
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+
+            // Show loading spinner
+            loading.style.display = 'block';
+            chatContainer.parentNode.insertBefore(loading, chatContainer.nextSibling);
+
+            try {
+                const response = await fetch('/gpt', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: new URLSearchParams({
+                        'user_input': userMessage,
+                        'selected_model': selectedModel
+                    })
+                });
+
+                const data = await response.text();
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(data, 'text/html');
+                const newMessages = doc.querySelectorAll('.message');
+                const latestResponse = newMessages[newMessages.length - 1].querySelector('.message-content').innerHTML;
+
+                // Process newlines and formatting
+                const formattedResponse = latestResponse
+                    .replace(/\n/g, '<br>') // Convert newlines to <br> tags
+                    .replace(/<br><br>/g, '</p><p>') // Create paragraphs
+                    .replace(/(<pre[^>]*>)/g, '$1<div class="code-container">');
+
+                loading.style.display = 'none';
+                const contentDiv = aiMessageDiv.querySelector('.message-content');
+                contentDiv.innerHTML = formattedResponse;
+                hljs.highlightAll();
+
+            } catch (error) {
+                loading.style.display = 'none';
+                aiMessageDiv.querySelector('.message-content').innerHTML = `Error: ${error.message}`;
+            }
+
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+            input.value = '';
+        }
+
+        // Initialize syntax highlighting
+        hljs.highlightAll();
+    });
+</script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
+    <script>hljs.highlightAll();</script>
+</body>
+</html>
+
+
